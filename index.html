@@ -1,1 +1,22 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07080c"><title>OmniCommerce</title><link rel="stylesheet" href="./styles.css"></head><body><div id="app"><div class="wrap"><div class="card"><div class="brand">OMNI<span>COMMERCE</span></div><h2>Loading commerce OS…</h2><p class="muted">Starting the live workspace.</p></div></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="./app.js"></script><script>window.addEventListener("error",e=>{const a=document.getElementById("app");if(a)a.innerHTML='<div class="wrap"><div class="card"><h2>Startup error</h2><p class="muted">'+String(e.message||"Unknown error").replace(/[<>&]/g,"")+'</p><button class="primary" onclick="location.reload()">Reload</button></div></div>'});window.addEventListener("unhandledrejection",()=>{const a=document.getElementById("app");if(a)a.innerHTML='<div class="wrap"><div class="card"><h2>Backend connection failed</h2><p class="muted">Retrying the live connection did not succeed.</p><button class="primary" onclick="location.reload()">Retry</button></div></div>'});</script></body></html>
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07080c"><title>OmniCommerce</title><link rel="stylesheet" href="./styles.css"></head>
+<body><div id="app"><div class="wrap"><div class="card"><div class="brand">OMNI<span>COMMERCE</span></div><h2>Starting OmniCommerce…</h2><p class="muted" id="bootmsg">Loading the live commerce workspace.</p></div></div></div>
+<script>
+(function(){
+  var app=document.getElementById("app");
+  function clean(x){return String(x||"Unknown startup error").replace(/[<>&]/g,"");}
+  function fail(x){app.innerHTML='<div class="wrap"><div class="card"><div class="brand">OMNI<span>COMMERCE</span></div><h2>Startup failed</h2><p class="muted">'+clean(x)+'</p><button class="primary" onclick="location.reload()">Retry</button></div></div>';}
+  function load(src,ms){return new Promise(function(resolve,reject){var s=document.createElement("script"),done=false,t=setTimeout(function(){if(!done){done=true;s.remove();reject(new Error("Timed out loading the backend client"))}},ms);s.src=src;s.onload=function(){if(!done){done=true;clearTimeout(t);resolve()}};s.onerror=function(){if(!done){done=true;clearTimeout(t);s.remove();reject(new Error("Could not load the backend client"))}};document.head.appendChild(s);});}
+  window.addEventListener("error",function(e){if(e&&e.error)fail(e.error.message||e.message);});
+  window.addEventListener("unhandledrejection",function(e){fail(e&&e.reason&&e.reason.message||"Backend request failed");});
+  (async function(){
+    try{
+      document.getElementById("bootmsg").textContent="Connecting to the live backend…";
+      try{await load("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js",7000);}
+      catch(e){await load("https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js",7000);}
+      if(!window.supabase||!window.supabase.createClient) throw new Error("Backend client unavailable");
+      var s=document.createElement("script");s.src="./app.js";s.onload=function(){};s.onerror=function(){fail("The application bundle could not be loaded");};document.body.appendChild(s);
+    }catch(e){fail(e.message);}
+  })();
+})();
+</script></body></html>
